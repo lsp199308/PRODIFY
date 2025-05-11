@@ -3,7 +3,7 @@
 
 
 <div align="center">
-  <img src="https://github.com/sthetix/PRODIFY/blob/main/prodify.jpg" alt="PRODIFY" width="400"/>
+  <img src="https://github.com/lsp199308/PRODIFY/blob/main/prodify.jpg" alt="PRODIFY" width="400"/>
   <br>
   <br>
 </div>
