@@ -571,7 +571,7 @@ def center_popup(popup):
 
 root = tk.Tk()
 root.title(f"PRODIFY - The PRODINFO Editor v{SCRIPT_VERSION}")
-root.geometry("440x500")
+root.geometry("440x650")
 try:
     root.iconphoto(True, tk.PhotoImage(file=icon_path))
 except Exception as e:
@@ -591,84 +591,187 @@ color_entries = {}
 checksum_entries = {}
 original_colors = {}
 
+def calculate_checksum():
+    # Get values from the dropdowns and the 8-digit number input
+    prefix = dropdown1.get()  # First dropdown value (no mapping needed)
+    model = dropdown2.get()  # Second dropdown value (needs mapping)
+    region = dropdown3.get()  # Third dropdown value (needs mapping)
+    value = dropdown4.get()  # Fourth dropdown value (used for checksum)
+    number = number_input.get()  # User input for the 8-digit number
+
+    # Ensure the input number is 8 digits long and contains only digits
+    if len(number) != 8 or not number.isdigit():
+        result_var.set("Invalid number!")
+        return
+
+    # Map model (second dropdown) to corresponding letter
+    model_map = {
+        "Lite": "J",
+        "软破": "A",
+        "芯片": "K",
+        "Oled": "T"
+    }
+    model_letter = model_map.get(model, "")  # Default to empty string if not found
+
+    # Map region (third dropdown) to corresponding letter
+    region_map = {
+        "国行": "C",
+        "欧版": "E",
+        "日版": "J",
+        "韩版": "K",
+        "All (开发机)": "L",
+        "马来版 ": "M",
+        "美版": "W"
+    }
+    region_letter = region_map.get(region, "")  # Default to empty string if not found
+
+    # Combine the dropdown selections (except the first three dropdowns, for display)
+    serial_number = value + number  # Only use the 4th dropdown and user input for checksum
+
+    # Split into odd and even indexed digits (1-indexed for clarity)
+    odd_sum = sum(int(serial_number[i]) for i in range(0, len(serial_number), 2))  # odd positions
+    even_sum = sum(int(serial_number[i]) for i in range(1, len(serial_number), 2))  # even positions
+
+    # Apply checksum formula
+    checksum = (3 * even_sum + odd_sum) % 10
+    if checksum != 0:
+        checksum = 10 - checksum
+
+    # Create the final serial number
+    final_serial_number = f"{prefix}{model_letter}{region_letter}{value}{number}{checksum}"
+
+    # Set the result in the result label
+    result_var.set(f"计算的序列号位: {final_serial_number}")
+    
+    # Clear the entry and insert the calculated serial number
+    entry_input.delete(0, tk.END)
+    entry_input.insert(0, final_serial_number)
+
+
 input_frame = tk.Frame(root)
 input_frame.grid(row=0, column=0, columnspan=3, pady=10)
 
 input_var = tk.StringVar()
 input_var.trace("w", limit_input_length)
 
-prodinfo_label = tk.Label(input_frame, text="Current Serial Number ")
+prodinfo_label = tk.Label(input_frame, text="序列号 ")
 prodinfo_label.grid(row=0, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 prodinfo_text = tk.Text(input_frame, bg="white", width=30, height=1, state=tk.DISABLED)
 prodinfo_text.grid(row=0, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
-tk.Label(input_frame, text="New Serial Number ").grid(row=1, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+tk.Label(input_frame, text="新建序列号 ").grid(row=1, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 entry_input = tk.Entry(input_frame, textvariable=input_var, width=40)
 entry_input.grid(row=1, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
-BatteryLot_label = tk.Label(input_frame, text="BatteryLot ")
-BatteryLot_label.grid(row=2, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+#序列号合法性
+# "Number edit" label and dropdowns in a compact layout
+number_edit_label = tk.Label(input_frame, text="序列号标准")
+number_edit_label.grid(row=2, column=0, padx=(0, 0), pady=0, sticky=tk.W)  # **RED: Reduced vertical padding**
+
+# Dropdowns for selections with minimal spacing
+dropdown1_values = ["X"]
+dropdown1 = tk.StringVar()
+dropdown1.set(dropdown1_values[0])  # Default value
+dropdown1_menu = tk.OptionMenu(input_frame, dropdown1, *dropdown1_values)
+dropdown1_menu.grid(row=2, column=1, padx=(0, 0), pady=0, sticky=tk.W)  # **RED: Reduced vertical padding**
+
+dropdown2_values = ["软破", "Lite", "芯片", "Oled"]
+dropdown2 = tk.StringVar()
+dropdown2.set(dropdown2_values[0])  # Default value
+dropdown2_menu = tk.OptionMenu(input_frame, dropdown2, *dropdown2_values)
+dropdown2_menu.grid(row=2, column=1, padx=(50, 0), pady=0, sticky=tk.W)  # **RED: Reduced vertical padding**
+
+
+dropdown3_values = ["国行", "欧版", "日版", "韩版", "All (开发机)", "马来版", "美版"]
+dropdown3 = tk.StringVar()
+dropdown3.set(dropdown3_values[0])  # Default value
+dropdown3_menu = tk.OptionMenu(input_frame, dropdown3, *dropdown3_values)
+dropdown3_menu.grid(row=2, column=1, padx=(125, 0), pady=0, sticky=tk.W)  # **RED: Reduced vertical padding**
+
+dropdown4_values = [10, 40, 50, 70, 90]
+dropdown4 = tk.StringVar()
+dropdown4.set(dropdown4_values[0])  # Default value
+dropdown4_menu = tk.OptionMenu(input_frame, dropdown4, *dropdown4_values)
+dropdown4_menu.grid(row=2, column=1, padx=(200, 0), pady=0, sticky=tk.W)  # **RED: Reduced vertical padding**
+
+# Input box for 8-digit number
+tk.Label(input_frame, text="自定义8位序列号").grid(row=3, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+number_input = tk.Entry(input_frame, width=20)
+number_input.grid(row=3, column=1, padx=(0, 2), pady=2, sticky=tk.W)
+
+# Button to calculate the serial number and display it
+result_var = tk.StringVar()
+result_button = tk.Button(input_frame, text="自动计算序列号校验位", command=calculate_checksum, height=1)
+result_button.grid(row=3, column=1, padx=(210, 2), pady=2, sticky=tk.W)
+
+# Label to display the result
+result_label = tk.Label(input_frame, textvariable=result_var)
+result_label.grid(row=4, column=1, columnspan=3, pady=5, sticky=tk.W)
+
+#电池批号
+BatteryLot_label = tk.Label(input_frame, text="电池批号 ")
+BatteryLot_label.grid(row=5, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 BatteryLot_text = tk.Text(input_frame, bg="white", width=30, height=1, state=tk.DISABLED)
-BatteryLot_text.grid(row=2, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+BatteryLot_text.grid(row=5, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
 # Add "BatteryLot" label and input field in row 4 to avoid conflict with other widgets
-BatteryLot_label = tk.Label(input_frame, text="New BatteryLot")
-BatteryLot_label.grid(row=3, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+BatteryLot_label = tk.Label(input_frame, text="新建电池批号")
+BatteryLot_label.grid(row=6, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 BatteryLot_input_var = tk.StringVar()
 BatteryLot_input = tk.Entry(input_frame, textvariable=BatteryLot_input_var, width=40)
-BatteryLot_input.grid(row=3, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+BatteryLot_input.grid(row=6, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 # 定义对应的地区信息和编码
 region_codes = {
-    "00": "Japan",
-    "01": "USA",
-    "02": "Europe",
-    "03": "Australia",
-    "04": "China",
-    "05": "Korea",
-    "06": "Taiwan"
+    "00": "日本",
+    "01": "美国",
+    "02": "欧洲",
+    "03": "澳大利亚",
+    "04": "中国",
+    "05": "韩国",
+    "06": "台湾"
 }
 
 # 创建一个显示选项（根据地区名称）
 display_options = [f"{code}    {name}" for code, name in region_codes.items()]
 
 # 更新 RegionCode label 和 Text 部分
-RegionCode_label = tk.Label(input_frame, text="RegionCode ")
-RegionCode_label.grid(row=4, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+RegionCode_label = tk.Label(input_frame, text="区域码 ")
+RegionCode_label.grid(row=7, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 RegionCode_text = tk.Text(input_frame, bg="white", width=30, height=1, state=tk.DISABLED)
-RegionCode_text.grid(row=4, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+RegionCode_text.grid(row=7, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
 # New RegionCode 改为下拉框（OptionMenu）
-RegionCode_label = tk.Label(input_frame, text="New RegionCode")
-RegionCode_label.grid(row=5, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+RegionCode_label = tk.Label(input_frame, text="选择区域")
+RegionCode_label.grid(row=8, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 
 # 使用 StringVar 来存储选择的值
 RegionCode_input_var = tk.StringVar()
 
 # 创建一个 OptionMenu，下拉框中的值来自 display_options
 RegionCode_input = tk.OptionMenu(input_frame, RegionCode_input_var, *display_options)
-RegionCode_input.grid(row=5, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+RegionCode_input.grid(row=8, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
 # 强制更新，确保界面渲染
 root.update_idletasks()
 
-bezel_color_label = tk.Label(input_frame, text="Bezel Color")
-bezel_color_label.grid(row=6, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+bezel_color_label = tk.Label(input_frame, text="内边框")
+bezel_color_label.grid(row=10, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 bezel_color_entry = tk.StringVar()
 color_entries['Bezel Color'] = bezel_color_entry
 bezel_color_input = tk.Entry(input_frame, textvariable=bezel_color_entry, width=30)
-bezel_color_input.grid(row=6, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+bezel_color_input.grid(row=10, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 bezel_color_entry.trace("w", lambda *args: limit_hex_input('Bezel Color'))
 
-main_color_label = tk.Label(input_frame, text="Main Color")
-main_color_label.grid(row=7, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+main_color_label = tk.Label(input_frame, text="外边框")
+main_color_label.grid(row=11, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 main_color_entry = tk.StringVar()
 color_entries['Main Color'] = main_color_entry
 main_color_input = tk.Entry(input_frame, textvariable=main_color_entry, width=30)
-main_color_input.grid(row=7, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+main_color_input.grid(row=11, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 main_color_entry.trace("w", lambda *args: limit_hex_input('Main Color'))
 
 color_frame = tk.Frame(input_frame)
-color_frame.grid(row=6, column=1, rowspan=2, padx=(0, 0), pady=0, sticky=tk.E)
+color_frame.grid(row=9, column=1, rowspan=6, padx=(0, 0), pady=0, sticky=tk.E)
 
 
 for idx, label in enumerate(offsets.keys()):
@@ -683,13 +786,13 @@ for idx, label in enumerate(offsets.keys()):
     checksum_display.grid_remove()
 
 # Place "Opened File" label and value in input_frame to align with input fields
-file_name_label = tk.Label(input_frame, text="Opened File:")
-file_name_label.grid(row=8, column=0, padx=(0, 0), pady=5, sticky=tk.W)
+file_name_label = tk.Label(input_frame, text="Prodinfo位置:")
+file_name_label.grid(row=12, column=0, padx=(0, 0), pady=5, sticky=tk.W)
 file_name_value_label = tk.Label(input_frame, text="", anchor='w')
-file_name_value_label.grid(row=8, column=1, padx=(0, 5), pady=5, sticky=tk.W)
+file_name_value_label.grid(row=9, column=1, padx=(0, 5), pady=5, sticky=tk.W)
 
 joycon_frame = tk.Frame(root)
-joycon_frame.grid(row=9, column=0, columnspan=3)
+joycon_frame.grid(row=12, column=0, columnspan=3)
 
 left_joycon_label = tk.Label(joycon_frame)
 left_joycon_label.grid(row=0, column=0, padx=(20, 20), pady=(10, 0))
@@ -706,12 +809,12 @@ right_joycon_label.grid(row=0, column=2, padx=(20, 20), pady=(10, 0))
 load_images()
 
 btn_frame = tk.Frame(root)
-btn_frame.grid(row=10, column=0, columnspan=3, pady=(5, 0))
+btn_frame.grid(row=13, column=0, columnspan=3, pady=(5, 0))
 
-btn_load = tk.Button(btn_frame, text="Load PRODINFO", command=open_prodinfo)
+btn_load = tk.Button(btn_frame, text="选择Prodinfo", command=open_prodinfo)
 btn_load.grid(row=0, column=0, padx=(95, 5), pady=(5, 0))
 
-btn_update = tk.Button(btn_frame, text="Update PRODINFO", command=update_prodinfo)
+btn_update = tk.Button(btn_frame, text="更新Prodinfo", command=update_prodinfo)
 btn_update.grid(row=0, column=1, padx=(5, 95), pady=(5, 0))
 
 root.mainloop()

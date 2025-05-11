@@ -34,16 +34,28 @@ Before using PRODIFY, ensure you have:
 3. **Edit Serial Number**:
    - The current serial number is displayed. Enter a new serial number if needed (14 characters max).
   
-4. **Edit battery batch number**:
+4. **Serial number validity check**:
+   - Able to automatically calculate the serial number checksum.
+   - After separating the digits, add the digits in each group together. Multiply the sum of the even digits by 3, then add the sum of the odd digits. To calculate the check digit, take this value modulo 10, and if not 0, subtract from 10.
+
+   - Example: XAW10075273452
+
+   - The non-check digits are 1007527345. Separating into odd and even groups, we get the following:
+
+   - Odds: 1 + 0 + 5 + 7 + 4 = 17 Evens: 0 + 7 + 2 + 3 + 5 = 17
+
+   - Applying the algorithm, we get ((3 * 17) + 17) % 10 = 8, which is not 0, thus 10 - 8 = 2, matching the example's check digit.
+
+5. **Edit battery batch number**:
    - Display the current battery batch number. If necessary, enter a new battery batch number (up to 22 characters).
   
-5. **Edit region code**:
+6. **Edit region code**:
    - Display the current region code. If necessary, enter a new region code.
 
-6. **Customize Colors**:
+7. **Customize Colors**:
    - Modify the "Bezel Color" and "Main Color" by either entering a HEX color code directly or using the color picker. The tool automatically calculates and updates the CRC-16 checksum to ensure the integrity of the changes.
 
-7. **Update `prodinfo` File**:
+8. **Update `prodinfo` File**:
    - Click "Update PRODINFO" to save your changes. The tool will update the serial number, colors, and calculate the SHA-256 hash for the file.
 
 ## Important Notes
