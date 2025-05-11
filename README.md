@@ -8,7 +8,7 @@
   <br>
 </div>
 <div align="center">
-  <img src="https://github.com/lsp199308/PRODIFY/blob/main/prodifyzh.jpg" alt="PRODIFY" width="400"/>
+  <img src="https://github.com/lsp199308/PRODIFY/blob/main/prodifyenzh.jpg" alt="PRODIFY" width="400"/>
   <br>
   <br>
 </div>
