@@ -33,11 +33,17 @@ Before using PRODIFY, ensure you have:
 
 3. **Edit Serial Number**:
    - The current serial number is displayed. Enter a new serial number if needed (14 characters max).
+  
+4. **Edit battery batch number**:
+   - Display the current battery batch number. If necessary, enter a new battery batch number (up to 22 characters).
+  
+5. **Edit region code**:
+   - Display the current region code. If necessary, enter a new region code.
 
-4. **Customize Colors**:
+6. **Customize Colors**:
    - Modify the "Bezel Color" and "Main Color" by either entering a HEX color code directly or using the color picker. The tool automatically calculates and updates the CRC-16 checksum to ensure the integrity of the changes.
 
-5. **Update `prodinfo` File**:
+7. **Update `prodinfo` File**:
    - Click "Update PRODINFO" to save your changes. The tool will update the serial number, colors, and calculate the SHA-256 hash for the file.
 
 ## Important Notes
